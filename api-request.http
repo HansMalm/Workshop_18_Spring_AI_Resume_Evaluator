@@ -1,0 +1,18 @@
+### Simple evaluation (plain text)
+POST http://localhost:8080/api/v1/resume/evaluate/simple
+Content-Type: application/json
+
+{
+  "resumeText": "Software developer with 3 years of experience in Java, Spring Boot, and REST APIs. Built and maintained backend services for an e-commerce platform. Familiar with SQL, Git, and Agile methodologies. Currently learning React and cloud basics.",
+  "jobDescriptionText": "We are looking for a Backend Developer with strong Java and Spring Boot skills, experience with SQL databases, and familiarity with cloud platforms (AWS or Azure). Experience with Docker and CI/CD pipelines is a plus. Must be comfortable working in an Agile team."
+}
+
+
+### Structured evaluation (JSON)
+POST http://localhost:8080/api/v1/resume/evaluate
+Content-Type: application/json
+
+{
+  "resumeText": "Software developer with 3 years of experience in Java, Spring Boot, and REST APIs. Built and maintained backend services for an e-commerce platform. Familiar with SQL, Git, and Agile methodologies. Currently learning React and cloud basics.",
+  "jobDescriptionText": "We are looking for a Backend Developer with strong Java and Spring Boot skills, experience with SQL databases, and familiarity with cloud platforms (AWS or Azure). Experience with Docker and CI/CD pipelines is a plus. Must be comfortable working in an Agile team."
+}
