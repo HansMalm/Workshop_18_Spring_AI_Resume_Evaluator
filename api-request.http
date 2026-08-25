@@ -16,3 +16,23 @@ Content-Type: application/json
   "resumeText": "Software developer with 3 years of experience in Java, Spring Boot, and REST APIs. Built and maintained backend services for an e-commerce platform. Familiar with SQL, Git, and Agile methodologies. Currently learning React and cloud basics.",
   "jobDescriptionText": "We are looking for a Backend Developer with strong Java and Spring Boot skills, experience with SQL databases, and familiarity with cloud platforms (AWS or Azure). Experience with Docker and CI/CD pipelines is a plus. Must be comfortable working in an Agile team."
 }
+
+
+### Structured evaluation - strong match
+POST http://localhost:8080/api/v1/resume/evaluate
+Content-Type: application/json
+
+{
+  "resumeText": "Backend developer with 5 years of experience building and scaling Java Spring Boot microservices. Deep experience with PostgreSQL and MySQL, containerizing services with Docker, and deploying to AWS (EC2, RDS, S3). Built and maintained CI/CD pipelines using GitHub Actions and Jenkins. Comfortable working in Agile/Scrum teams, leading sprint planning, and mentoring junior developers.",
+  "jobDescriptionText": "We are looking for a Backend Developer with strong Java and Spring Boot skills, experience with SQL databases, and familiarity with cloud platforms (AWS or Azure). Experience with Docker and CI/CD pipelines is a plus. Must be comfortable working in an Agile team."
+}
+
+
+### Structured evaluation - poor match
+POST http://localhost:8080/api/v1/resume/evaluate
+Content-Type: application/json
+
+{
+  "resumeText": "Graphic designer with 4 years of experience creating branding assets, marketing materials, and social media content using Adobe Photoshop, Illustrator, and Figma. Collaborated with marketing teams to develop campaign visuals and managed print production timelines with vendors.",
+  "jobDescriptionText": "We are looking for a Backend Developer with strong Java and Spring Boot skills, experience with SQL databases, and familiarity with cloud platforms (AWS or Azure). Experience with Docker and CI/CD pipelines is a plus. Must be comfortable working in an Agile team."
+}
