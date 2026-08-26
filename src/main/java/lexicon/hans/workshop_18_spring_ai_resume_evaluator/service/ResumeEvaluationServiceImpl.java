@@ -3,13 +3,18 @@ package lexicon.hans.workshop_18_spring_ai_resume_evaluator.service;
 import lexicon.hans.workshop_18_spring_ai_resume_evaluator.dto.ResumeEvaluationRequest;
 import lexicon.hans.workshop_18_spring_ai_resume_evaluator.dto.ResumeEvaluationResponse;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class ResumeEvaluationServiceImpl implements ResumeEvaluationService {
@@ -20,9 +25,17 @@ public class ResumeEvaluationServiceImpl implements ResumeEvaluationService {
     // Step 2: ChatClient, needed for the structured output method below
     private final ChatClient chatClient;
 
-    public ResumeEvaluationServiceImpl(OpenAiChatModel openAiChatModel, ChatClient.Builder builder) {
+    // Prompt template: loaded from resources/prompts, used by both methods below
+    private final PromptTemplate promptTemplate;
+
+    public ResumeEvaluationServiceImpl(
+            OpenAiChatModel openAiChatModel,
+            ChatClient.Builder builder,
+            @Value("classpath:/prompts/resume-evaluation-prompt.st") Resource promptResource
+    ) {
         this.openAiChatModel = openAiChatModel;
         this.chatClient = builder.build();
+        this.promptTemplate = new PromptTemplate(promptResource);
     }
 
     // Step 1 (learning): persona + prompt template, plain text output
@@ -50,29 +63,11 @@ public class ResumeEvaluationServiceImpl implements ResumeEvaluationService {
                             """)
                     .build();
 
-            // Prompt template: placeholders filled in with the request's data
-            String userInput = String.format("""
-                            Evaluate this resume against the job description below.
-
-                            Resume:
-                            %s
-
-                            Job Description:
-                            %s
-
-                            Include:
-                            1. Overall match assessment
-                            2. Key strengths
-                            3. Missing skills or gaps
-                            4. Actionable feedback
-                            """,
-                    request.resumeText(),
-                    request.jobDescriptionText()
-            );
-
-            UserMessage userMessage = UserMessage.builder()
-                    .text(userInput)
-                    .build();
+            // Prompt template: {resumeText} and {jobDescriptionText} filled in from the request
+            Message userMessage = promptTemplate.createMessage(Map.of(
+                    "resumeText", request.resumeText(),
+                    "jobDescriptionText", request.jobDescriptionText()
+            ));
 
             // model/temperature/max-tokens come from application.yaml — no override needed here
             Prompt prompt = Prompt.builder()
@@ -110,6 +105,12 @@ public class ResumeEvaluationServiceImpl implements ResumeEvaluationService {
 
             String format = converter.getFormat();
 
+            // Prompt template: {resumeText} and {jobDescriptionText} filled in from the request
+            String userText = promptTemplate.render(Map.of(
+                    "resumeText", request.resumeText(),
+                    "jobDescriptionText", request.jobDescriptionText()
+            ));
+
             ChatResponse response = chatClient.prompt()
                     .system("""
                             You are a Senior Technical Recruiter with 20 years of experience.
@@ -125,24 +126,7 @@ public class ResumeEvaluationServiceImpl implements ResumeEvaluationService {
 
                             Format the output as a JSON object that matches this schema:
                             """ + format)
-                    .user(String.format("""
-                                    Evaluate this resume against the job description below.
-
-                                    Resume:
-                                    %s
-
-                                    Job Description:
-                                    %s
-
-                                    Include:
-                                    1. An overall match score
-                                    2. Key strengths
-                                    3. Missing skills or gaps
-                                    4. Actionable feedback
-                                    """,
-                            request.resumeText(),
-                            request.jobDescriptionText()
-                    ))
+                    .user(userText)
                     .call()
                     .chatResponse();
 
